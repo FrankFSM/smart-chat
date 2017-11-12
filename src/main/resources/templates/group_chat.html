@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Spring Boot + WebSocket +广播</title>
+
+</head>
+<body>
+<noscript><h2 style="color: #ff0000;">貌似你的浏览器不支持websocket</h2></noscript>
+<div>
+  <div>
+
+    <button id="connect" onclick="connect();">链接</button>
+    <button id="disconnect" disabled="disabled" onclick="disconnect()">断开</button>
+  </div>
+  <div id="conversationDiv">
+    <label>输入消息</label><input type="text" id="content"/>
+    <button id="sendName" onclick="sendName()">发送</button>
+
+  </div>
+  <div id="allChatMessage">
+  </div>
+
+</div>
+<script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.js"></script>
+
+<script type="text/javascript">
+
+  var stompClient = null;
+  function setConnected(connected) {
+    document.getElementById("connect").disabled = connected;
+    document.getElementById("disconnect").disabled = !connected;
+    document.getElementById("conversationDiv").style.visibility = connected ? 'visible' : 'hidden';
+
+  }
+
+  function connect() {
+    var socket = new SockJS('/endpointGroup');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (fream) {
+      setConnected(true);
+      console.log("Conected" + fream);
+      stompClient.subscribe("/groupChat/chat", function (response) {
+        showResponse(JSON.parse(response.body));
+      });
+    });
+  }
+
+  function disconnect() {
+    if (stompClient != null) {
+      stompClient.disconnect();
+    }
+    setConnected(false);
+  }
+
+  function sendName() {
+    var content = $('#content').val();
+    stompClient.send("/sendToAll", {}, JSON.stringify({'content': content}))
+  }
+
+  function showResponse(message) {
+    $('#allChatMessage').append(
+        "<b>发送者: " + message.sender + ", 内容: " + message.content + "</b><br/>");
+  }
+</script>
+
+
+</body>
+</html>

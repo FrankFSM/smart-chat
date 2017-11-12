@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Spring Boot + WebSocket +广播</title>
+  <script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
+  <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
+  <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.js"></script>
+</head>
+<body>
+<noscript><h2 style="color: #ff0000;">貌似你的浏览器不支持websocket</h2></noscript>
+<p>聊天室</p>
+
+<form id="wiselyForm">
+
+  <label><p>接收者:</p></label>
+  <input type="text" id="reciver" name="reciver"/>
+  <label><p>内容:</p></label>
+  <textarea rows="4" cols="60" name="text"></textarea>
+  <input type="submit"/>
+
+</form>
+
+<script type="text/javascript">
+  $("#wiselyForm").submit(function (e) {
+    e.preventDefault();
+    var text = $("#wiselyForm").find('textarea[name="text"]').val();
+    var reciver = $("#reciver").val();
+    sendSpittler(reciver, text);
+  });
+
+  var sock = new SockJS("/endpointPoint");
+  var stomp = Stomp.over(sock);
+  stomp.connect({}, function (frame) {
+    stomp.subscribe("/user/pointChat/chat", handleNotification)
+  })
+
+  function handleNotification(message) {
+    var msg = JSON.parse(message.body);
+    console.log(msg);
+    var code = msg.code;
+    var reciver = $("#reciver").val();
+    var str;
+    switch (code) {
+      case 100000:
+        str = "<b>" + reciver + ":" + msg.text + "</b><br/>";
+        break;
+      case 200000:
+      case 302000:
+      default:
+        str = '<b>' + reciver + ':' + '<a href="' + msg.url +  '" target="_blank">'+ msg.text + '</a></b><br/>';
+        break;
+    }
+    $('#output').append(str);
+  }
+
+  function sendSpittler(reciver, text) {
+    stomp.send("/sendToPoint", {}, JSON.stringify({'reciver': reciver, "content": text}));
+  }
+
+  $("#stop").click(function () {
+    sock.close();
+  })
+</script>
+
+<div id="output">
+</div>
+
+</body>
+</html>

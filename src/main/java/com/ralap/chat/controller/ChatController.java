@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -43,7 +44,7 @@ public class ChatController {
 
         log.info("-------------SENT START-------------");
 
-        ChatMessage responsetCaht = new ChatMessage(principal.getName(), "All",
+        ChatMessage responsetCaht = new ChatMessage(principal.getName(), "all",
                 message.getContent(),
                 new Date(), ChatMessage.TYPE_GROUP);
         log.info("-------------SENT END-------------");
@@ -71,8 +72,11 @@ public class ChatController {
         }
 
         {
+            ChatMessage chatMessage = new ChatMessage();
+            chatMessage.setContent(content);
+            chatMessage.setSender(sender);
             messagingTemplate
-                    .convertAndSendToUser(reciver, "/pointChat/chat", content);
+                    .convertAndSendToUser(reciver, "/pointChat/chat", chatMessage);
         }
         log.info("-------------SENT START-------------");
 
@@ -95,6 +99,7 @@ public class ChatController {
         for (UserModel model : friendList) {
             if (principal.getName().equals(model.getName())) {
                 friendList.remove(model);
+                break;
             }
         }
         all.addAll(friendList);

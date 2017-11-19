@@ -3,6 +3,7 @@ package com.ralap.chat.service;
 
 import com.ralap.chat.domain.UserModel;
 import com.ralap.chat.mapper.UserMapper;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,5 +22,9 @@ public class UserService {
 
     public boolean addUser(UserModel user) {
         return userMapper.insertUser(user);
+    }
+
+    public List<UserModel> getAll() {
+        return userMapper.getAll();
     }
 }

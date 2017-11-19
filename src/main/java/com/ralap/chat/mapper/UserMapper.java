@@ -2,6 +2,7 @@ package com.ralap.chat.mapper;
 
 
 import com.ralap.chat.domain.UserModel;
+import java.util.List;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -21,4 +22,6 @@ public interface UserMapper {
     @Insert("insert into user(name,password,age,address,roles) "
             + "values(#{name},#{pasword},#{age},#{address},#{roles})")
     boolean insertUser(UserModel user);
+    @Select("select * from user")
+    List<UserModel> getAll();
 }

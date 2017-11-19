@@ -9,6 +9,9 @@ spring:
     hikari:
       maximum-pool-size: 10
       max-lifetime: 1765000
+  thymeleaf:
+    mode: LEGACYHTML5
+    cache: false
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
